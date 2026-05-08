@@ -93,7 +93,7 @@ Clone o repositório e navegue até a pasta do projeto:
 
 bash
 
-git clone https://github.com/SEU_USUARIO/ghost-ai.git
+git clone https://github.com/marcostga/Assistente-por-voz-com-LLM.git
 
 cd ghost-ai
 
