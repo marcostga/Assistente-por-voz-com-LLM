@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GHOST — Painel de Configurações</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="logo">
+    <span class="logo-icon">👻</span>
+    <div>
+      <div class="logo-title">GHOST</div>
+      <div class="logo-sub">Config Dashboard</div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-item active" data-tab="stt" id="nav-stt">
+      <span class="nav-icon">🎙️</span>
+      <span>STT</span>
+      <span class="nav-badge">Whisper</span>
+    </button>
+    <button class="nav-item" data-tab="tts" id="nav-tts">
+      <span class="nav-icon">🔊</span>
+      <span>TTS</span>
+      <span class="nav-badge">Pocket</span>
+    </button>
+    <button class="nav-item" data-tab="llm" id="nav-llm">
+      <span class="nav-icon">🧠</span>
+      <span>LLM</span>
+      <span class="nav-badge">Gemini</span>
+    </button>
+    <button class="nav-item" data-tab="agent" id="nav-agent">
+      <span class="nav-icon">⚙️</span>
+      <span>Agente</span>
+    </button>
+    <button class="nav-item" data-tab="logs" id="nav-logs">
+      <span class="nav-icon">📋</span>
+      <span>Logs</span>
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Conectando...</span>
+  </div>
+</aside>
+
+<!-- ── Main ────────────────────────────────────────────────────────────── -->
+<main class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <div>
+      <h1 id="tab-title">Speech-to-Text</h1>
+      <p id="tab-desc">Configurações do módulo de reconhecimento de voz (Whisper local)</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-ghost" onclick="loadConfig()">↺ Recarregar</button>
+      <button class="btn-primary" onclick="saveConfig()" id="save-btn">💾 Salvar Alterações</button>
+    </div>
+  </header>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- ── STT Tab ───────────────────────────────────────────────────────── -->
+  <section class="tab active" id="tab-stt">
+    <div class="grid-2">
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Modelo Whisper</h2>
+          <span class="tag">OpenAI</span>
+        </div>
+        <div class="field">
+          <label>Tamanho do Modelo</label>
+          <p class="field-desc">Modelos maiores são mais precisos mas mais lentos</p>
+          <div class="radio-group" id="stt-model-group">
+            <label class="radio-card" data-value="tiny">
+              <input type="radio" name="stt_model" value="tiny" />
+              <div class="radio-content">
+                <div class="radio-title">Tiny</div>
+                <div class="radio-sub">~39MB · Ultra-rápido</div>
+              </div>
+            </label>
+            <label class="radio-card" data-value="base">
+              <input type="radio" name="stt_model" value="base" />
+              <div class="radio-content">
+                <div class="radio-title">Base ★</div>
+                <div class="radio-sub">~145MB · Recomendado</div>
+              </div>
+            </label>
+            <label class="radio-card" data-value="small">
+              <input type="radio" name="stt_model" value="small" />
+              <div class="radio-content">
+                <div class="radio-title">Small</div>
+                <div class="radio-sub">~466MB · Alta qualidade</div>
+              </div>
+            </label>
+            <label class="radio-card" data-value="medium">
+              <input type="radio" name="stt_model" value="medium" />
+              <div class="radio-content">
+                <div class="radio-title">Medium</div>
+                <div class="radio-sub">~1.5GB · GPU recomendada</div>
+              </div>
+            </label>
+          </div>
+          <p class="note">⚠️ Mudar o modelo requer reiniciar o GHOST para recarregar</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Detecção de Silêncio (VAD)</h2>
+          <span class="tag">Audio</span>
+        </div>
+
+        <div class="field">
+          <label>Threshold de Silêncio <span class="val-display" id="val-silence-thresh"></span></label>
+          <p class="field-desc">Amplitude RMS mínima para considerar como voz ativa</p>
+          <input type="range" id="stt-silence-thresh" min="0.001" max="0.1" step="0.001" oninput="updateVal('val-silence-thresh', this.value)" />
+        </div>
+
+        <div class="field">
+          <label>Pre-roll (antes da fala) <span class="val-display" id="val-pad-pre"></span></label>
+          <p class="field-desc">Segundos capturados antes da fala ser detectada</p>
+          <input type="range" id="stt-pad-pre" min="0.1" max="1.0" step="0.05" oninput="updateVal('val-pad-pre', this.value + 's')" />
+        </div>
+
+        <div class="field">
+          <label>Post-roll (após silêncio) <span class="val-display" id="val-pad-post"></span></label>
+          <p class="field-desc">Segundos de silêncio antes de encerrar a gravação</p>
+          <input type="range" id="stt-pad-post" min="0.5" max="3.0" step="0.1" oninput="updateVal('val-pad-post', this.value + 's')" />
+        </div>
+
+        <div class="field">
+          <label>Duração Máxima <span class="val-display" id="val-max-dur"></span></label>
+          <p class="field-desc">Duração máxima de uma gravação</p>
+          <input type="range" id="stt-max-dur" min="5" max="120" step="5" oninput="updateVal('val-max-dur', this.value + 's')" />
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── TTS Tab ───────────────────────────────────────────────────────── -->
+  <section class="tab" id="tab-tts">
+    <div class="grid-2">
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Modelo de Linguagem</h2>
+          <span class="tag">Kyutai</span>
+        </div>
+        <div class="field">
+          <label>Variante do Modelo</label>
+          <p class="field-desc">O modelo 24 camadas tem qualidade superior mas é mais lento</p>
+          <div class="radio-group" id="tts-model-group">
+            <label class="radio-card" data-value="portuguese">
+              <input type="radio" name="tts_model" value="portuguese" />
+              <div class="radio-content">
+                <div class="radio-title">Portuguese</div>
+                <div class="radio-sub">12 camadas · Mais rápido</div>
+              </div>
+            </label>
+            <label class="radio-card" data-value="portuguese_24l">
+              <input type="radio" name="tts_model" value="portuguese_24l" />
+              <div class="radio-content">
+                <div class="radio-title">Portuguese 24L ★</div>
+                <div class="radio-sub">24 camadas · Melhor qualidade</div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Voz</h2>
+          <span class="tag">pt-BR</span>
+        </div>
+        <div class="field">
+          <label>Voz Selecionada</label>
+          <p class="field-desc">Vozes disponíveis no catálogo Kyutai para português</p>
+          <div class="radio-group" id="tts-voice-group">
+            <label class="radio-card" data-value="rafael">
+              <input type="radio" name="tts_voice" value="rafael" />
+              <div class="radio-content">
+                <div class="radio-title">🧑 Rafael ★</div>
+                <div class="radio-sub">Voz masculina nativa pt-BR</div>
+              </div>
+            </label>
+          </div>
+          <p class="note">💡 Você pode usar qualquer arquivo .wav para voice cloning passando o caminho</p>
+          <div class="field" style="margin-top:12px">
+            <label>Caminho customizado (voice cloning)</label>
+            <input type="text" id="tts-custom-voice" placeholder="Ex: C:\vozes\minha_voz.wav" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Cache de Voice State</label>
+          <p class="field-desc">O voice state é salvo em .safetensors para boot rápido</p>
+          <div class="info-box" id="tts-cache-info">
+            <span class="mono">audio/models/voice_rafael.safetensors</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── LLM Tab ───────────────────────────────────────────────────────── -->
+  <section class="tab" id="tab-llm">
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <h2>API Gemini</h2>
+        <span class="tag">Google</span>
+      </div>
+      <div class="field">
+        <label>Chave de API (GEMINI_API_KEY)</label>
+        <p class="field-desc">Armazenada no arquivo <span class="mono">.env</span> na raiz do projeto</p>
+        <div class="api-key-wrap">
+          <input type="password" id="llm-api-key" placeholder="AIza..." autocomplete="off" />
+          <button class="btn-ghost btn-sm" onclick="toggleApiKey()">👁 Ver</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Parâmetros de Geração</h2>
+          <span class="tag">GenerationConfig</span>
+        </div>
+
+        <div class="field">
+          <label>Temperature <span class="val-display" id="val-temperature"></span></label>
+          <p class="field-desc">Criatividade da resposta (0 = determinístico, 1 = criativo)</p>
+          <input type="range" id="llm-temperature" min="0" max="1" step="0.05" oninput="updateVal('val-temperature', this.value)" />
+        </div>
+
+        <div class="field">
+          <label>Top P <span class="val-display" id="val-top-p"></span></label>
+          <p class="field-desc">Probabilidade acumulada de tokens considerados</p>
+          <input type="range" id="llm-top-p" min="0" max="1" step="0.01" oninput="updateVal('val-top-p', this.value)" />
+        </div>
+
+        <div class="field">
+          <label>Top K <span class="val-display" id="val-top-k"></span></label>
+          <p class="field-desc">Número máximo de tokens candidatos considerados</p>
+          <input type="range" id="llm-top-k" min="1" max="100" step="1" oninput="updateVal('val-top-k', this.value)" />
+        </div>
+
+        <div class="field">
+          <label>Max Output Tokens <span class="val-display" id="val-max-tokens"></span></label>
+          <p class="field-desc">Limite máximo de tokens na resposta</p>
+          <input type="range" id="llm-max-tokens" min="256" max="8192" step="256" oninput="updateVal('val-max-tokens', this.value)" />
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Lista de Modelos</h2>
+          <span class="tag mono">MODELOS.json</span>
+        </div>
+        <p class="field-desc" style="margin-bottom:12px">Ordem de prioridade: o primeiro disponível é usado. Arraste para reordenar.</p>
+        <div class="models-list" id="models-list"></div>
+        <div class="models-actions">
+          <input type="text" id="new-model-input" placeholder="gemini-2.5-flash" />
+          <button class="btn-ghost btn-sm" onclick="addModel()">+ Adicionar</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Agent Tab ─────────────────────────────────────────────────────── -->
+  <section class="tab" id="tab-agent">
+    <div class="card" style="max-width:900px">
+      <div class="card-header">
+        <h2>System Prompt</h2>
+        <span class="tag mono">prompts.py</span>
+      </div>
+      <div class="field">
+        <label>Instrução de Sistema (Personalidade do GHOST)</label>
+        <p class="field-desc">Esse texto define o comportamento, personalidade e capacidades do agente</p>
+        <textarea id="agent-prompt" rows="16" placeholder="Você é o GHOST..."></textarea>
+        <p class="note">⚠️ Alterações entram em vigor no próximo restart do GHOST</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Logs Tab ──────────────────────────────────────────────────────── -->
+  <section class="tab" id="tab-logs">
+    <div class="card">
+      <div class="card-header">
+        <h2>Log do Agente</h2>
+        <span class="tag mono">logs/agent_connection.log</span>
+        <button class="btn-ghost btn-sm" style="margin-left:auto" onclick="loadLogs()">↺ Atualizar</button>
+      </div>
+      <div class="log-viewer" id="log-viewer">
+        <div class="log-empty">Carregando logs...</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

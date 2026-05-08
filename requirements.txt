@@ -1,8 +1,18 @@
+# Core LLM
+google-generativeai
 python-dotenv
-SpeechRecognition
-piper-tts
+
+# TTS (síntese de voz - Pocket-TTS / Kyutai Neural)
+pocket-tts
+torch
+
+# STT (transcrição de fala - Whisper local)
+openai-whisper
+
+# Áudio (compartilhado entre STT e TTS)
 sounddevice
 numpy
+scipy
+
+# Ferramentas do agente
 requests
-google-generativeai
-pyaudio

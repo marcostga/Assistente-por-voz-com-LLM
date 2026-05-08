@@ -16,14 +16,19 @@ HISTORY_FILE = os.path.join(BASE_DIR, 'logs', 'history.json')
 LAST_MODEL_FILE = os.path.join(BASE_DIR, 'logs', 'last_model.txt')
 
 class AIAgent:
-    def __init__(self):
+    def __init__(self, tts: TextToSpeech):
+        """
+        Args:
+            tts: Instância compartilhada de TextToSpeech — evita carregar o
+                 modelo Pocket-TTS duas vezes na memória.
+        """
+        self.tts = tts
         self._configure_genai()
         self.models = get_models_list()
         self.active_chat = None
         self.current_model_idx = self._load_last_model_idx()
         self.history = self._load_history()
-        self.tts = TextToSpeech() # Certifique-se de instanciar aqui
-        
+
         # Pré-conecta ao modelo LLM antes do loop de áudio iniciar
         print("[SISTEMA] Iniciando os motores de IA e pré-conectando aos modelos...")
         if not self._start_new_chat(self.current_model_idx):
@@ -116,11 +121,13 @@ class AIAgent:
         return False
 
     def generate_response(self, prompt):
-        if not self.active_chat and not self._start_new_chat():
-            return "Erro: Nenhum modelo disponível."
+        if not self.active_chat and not self._start_new_chat(self.current_model_idx):
+            msg = "Erro: Nenhum modelo disponível."
+            self.tts.speak(msg)
+            return msg
 
-        # Tenta conectar e enviar a mensagem varrendo a lista inteira se necessário
-        while self.current_model_idx < len(self.models):
+        # Tenta enviar a mensagem varrendo no máximo len(models) vezes para evitar loop infinito
+        for _attempt in range(len(self.models)):
             try:
                 agent_logger.info(f"Enviando mensagem para o modelo ativo: {self.models[self.current_model_idx]}")
                 # O SDK gerencia as tool calls aqui automaticamente
@@ -143,17 +150,19 @@ class AIAgent:
                 agent_logger.warning(f"Limite de cota atingido no modelo {self.models[self.current_model_idx]}.")
                 print(f"[SISTEMA] Limite de cota atingido no modelo {self.models[self.current_model_idx]}. Passando para o próximo...")
                 self.tts.speak("Meu limite de processamento com este modelo foi atingido. Mudando para o próximo cérebro...")
-                # Tenta o próximo dando a volta na lista
-                if not self._start_new_chat((self.current_model_idx + 1) % len(self.models)):
+                next_idx = (self.current_model_idx + 1) % len(self.models)
+                if not self._start_new_chat(next_idx):
                     break
             except Exception as e:
                 agent_logger.error(f"Erro na geração com {self.models[self.current_model_idx]}: {e}")
                 print(f"[SISTEMA] Ocorreu um erro no modelo {self.models[self.current_model_idx]}. Passando para o próximo...")
-                # Tenta o próximo dando a volta na lista
-                if not self._start_new_chat((self.current_model_idx + 1) % len(self.models)):
+                next_idx = (self.current_model_idx + 1) % len(self.models)
+                if not self._start_new_chat(next_idx):
                     break
         
-        return "Desculpe, testei todos os modelos da sua lista e nenhum pôde me responder no momento."
+        msg = "Desculpe, testei todos os modelos da sua lista e nenhum pôde me responder no momento."
+        self.tts.speak(msg)
+        return msg
 
     def _save_history(self):
         """Versão simplificada que mantém a estrutura básica para o JSON"""
