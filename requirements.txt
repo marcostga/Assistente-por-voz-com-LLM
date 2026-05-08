@@ -1,0 +1,8 @@
+python-dotenv
+SpeechRecognition
+piper-tts
+sounddevice
+numpy
+requests
+google-generativeai
+pyaudio

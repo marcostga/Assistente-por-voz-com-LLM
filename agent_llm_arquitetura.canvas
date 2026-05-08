@@ -1,0 +1,33 @@
+{
+	"nodes":[
+		{"id":"grp_aiagent","type":"group","x":0,"y":0,"width":800,"height":700,"label":"class AIAgent (llm.py)"},
+		{"id":"node_init","type":"text","text":"def __init__","x":300,"y":50,"width":200,"height":60,"color":"4"},
+		{"id":"node_gen_resp","type":"text","text":"def generate_response","x":300,"y":640,"width":200,"height":60,"color":"5"},
+		{"id":"node_tts","type":"text","text":"class TextToSpeech\n(audio/tts.py)","x":-280,"y":630,"width":200,"height":80,"color":"6"},
+		{"id":"node_save_hist","type":"text","text":"def _save_history","x":50,"y":580,"width":200,"height":60,"color":"2"},
+		{"id":"node_start_chat","type":"text","text":"def _start_new_chat","x":300,"y":440,"width":200,"height":60,"color":"2"},
+		{"id":"node_save_idx","type":"text","text":"def _save_last_model","x":580,"y":440,"width":200,"height":60,"color":"2"},
+		{"id":"node_load_idx","type":"text","text":"def _load_last_model_idx","x":580,"y":200,"width":200,"height":60,"color":"2"},
+		{"id":"node_last_mdl_file","type":"text","text":"LAST_MODEL_FILE\n(logs/last_model.txt)","x":900,"y":190,"width":200,"height":80,"color":"3"},
+		{"id":"node_load_hist","type":"text","text":"def _load_history","x":300,"y":320,"width":200,"height":60,"color":"2"},
+		{"id":"node_hist_file","type":"text","text":"HISTORY_FILE\n(logs/history.json)","x":-220,"y":310,"width":200,"height":80,"color":"3"},
+		{"id":"node_cfg_genai","type":"text","text":"def _configure_genai","x":80,"y":200,"width":200,"height":60,"color":"2"},
+		{"id":"node_api_key","type":"text","text":"GEMINI_API_KEY\n(config/settings.py)","x":-220,"y":190,"width":200,"height":80,"color":"1"}
+	],
+	"edges":[
+		{"id":"e1","fromNode":"node_init","fromSide":"bottom","toNode":"node_cfg_genai","toSide":"right"},
+		{"id":"e2","fromNode":"node_init","fromSide":"bottom","toNode":"node_load_hist","toSide":"top"},
+		{"id":"e3","fromNode":"node_init","fromSide":"bottom","toNode":"node_load_idx","toSide":"left"},
+		{"id":"e4","fromNode":"node_init","fromSide":"bottom","toNode":"node_start_chat","toSide":"top"},
+		{"id":"e5","fromNode":"node_init","fromSide":"left","toNode":"node_tts","toSide":"right"},
+		{"id":"e6","fromNode":"node_load_hist","fromSide":"left","toNode":"node_hist_file","toSide":"right"},
+		{"id":"e7","fromNode":"node_save_hist","fromSide":"left","toNode":"node_hist_file","toSide":"bottom"},
+		{"id":"e8","fromNode":"node_load_idx","fromSide":"right","toNode":"node_last_mdl_file","toSide":"left"},
+		{"id":"e9","fromNode":"node_save_idx","fromSide":"right","toNode":"node_last_mdl_file","toSide":"bottom"},
+		{"id":"e10","fromNode":"node_cfg_genai","fromSide":"left","toNode":"node_api_key","toSide":"right"},
+		{"id":"e11","fromNode":"node_start_chat","fromSide":"right","toNode":"node_save_idx","toSide":"left"},
+		{"id":"e12","fromNode":"node_gen_resp","fromSide":"top","toNode":"node_start_chat","toSide":"bottom"},
+		{"id":"e13","fromNode":"node_gen_resp","fromSide":"left","toNode":"node_save_hist","toSide":"right"},
+		{"id":"e14","fromNode":"node_gen_resp","fromSide":"left","toNode":"node_tts","toSide":"right"}
+	]
+}
